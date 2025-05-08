@@ -1,0 +1,8 @@
+# Mac/OSX
+.DS_Store
+
+# resources
+resources/
+
+#Python
+__pycache__/
