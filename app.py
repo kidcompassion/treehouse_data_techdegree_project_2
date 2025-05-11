@@ -1,4 +1,5 @@
 import constants
+import statistics
 import copy
 
 CONSTANT_TEAMS = constants.TEAMS
@@ -121,6 +122,8 @@ def balance_teams(team_data):
     # Set up the new all_teams structure
     all_teams = []
 
+    # can this be done in a function, to avoid repeating everything in such a clunky way?
+
     # First, do the EXPERIENCED players
     # loop through the list of teams
     for i, team in enumerate(team_data):
@@ -149,43 +152,125 @@ def balance_teams(team_data):
     return all_teams
 
 
-
 def start_app():
 
     teams = balance_teams(CONSTANT_TEAMS_COPY)
-    print("===========> START <=============")
+    
+    print("BASKETBALL TEAM STATS TOOL")
     while True:
         selection_a = input("""
-            Here are your choices:\n
-            A) Display Team Stats \n
-            B) Quit \n
+            ---- MAIN MENU----
+            Here are your choices:
+            A) Display Team Stats
+            B) Quit
+            Enter an option:             
         """)
 
         if selection_a == "A".lower():
             selection_b = input(
                 """
-                A) Panthers\n
-                B) Bandits\n
-                C) Warriors\n
+                A) Panthers
+                B) Bandits
+                C) Warriors
                 \n
-                Enter an option:\n
+                Enter an option:
                 """
             )
 
-            if selection_b == "A".lower():
-                for player in teams[0]['Panthers']:
-                    print(player)
+            if selection_b.lower() == "a":
+                # can this be constructed dynamically?
+                # title
+                # team name
+                # stats
+                # players
+                #
+                team_name = "Panthers"
+                count_players(teams[0][team_name])
+             
+                count_player_experience(teams[0][team_name])
+
+                calculate_avg_height(teams[0][team_name])
+                # for player in teams[0]['Panthers']:
+
+                #     unpack_print_details(**player)
+                #     #print_player_details(name=player['name'], guardians = player['guardians'], experience = player['experience'], height=player["height"])
+
                 #print(teams[0]['Panthers'])
-            elif selection_b == "B".lower():
+            elif selection_b.lower() == "b":
+
+                team_name = "Bandits"
+                count_players(teams[1][team_name])
+               
                 for player in teams[1]['Bandits']:
-                    print(player)
-            elif selection_b == "C".lower():
+                    print_player_details(name=player['name'], guardians = player['guardians'], experience = player['experience'], height=player["height"])
+            elif selection_b.lower() == "c":
+
+                team_name = "Warriors"
+                count_players(teams[2][team_name])
+
                 for player in teams[2]['Warriors']:
-                    print(player)
-        # Show menu A
-    # Show menu B
-    # Show players on team and guardians
+                    print_player_details(name=player['name'], guardians = player['guardians'], experience = player['experience'], height=player["height"])
+
+
+
+def count_players(team_roster):
+    print(f"{len(team_roster)}")
+    
+def count_player_experience(team_roster):
+    total_exp = 0
+    total_inexp = 0
+    for player in team_roster:
+        if player['experience'] == True:
+            total_exp +=1
+        else:
+            total_inexp += 1
+
+    print(f"{total_exp} experienced players and {total_inexp} inexperienced players")
+
+    
+    print(total_exp)
+
+def calculate_avg_height(team_roster):
+    all_heights = []
+    for player in team_roster:
+        all_heights.append(int(player['height']))
+    
+    avg_height = statistics.mean(all_heights)
+    print(avg_height)
+
+def print_player_details(**kwargs):
+    for key, value in kwargs.items():
+        print(f"{key} : {value}")
+
+def unpack_print_details(name, guardians, experience, height):
+    print(f"{name}")
+
+    for g in guardians:
+        print(f"{g}")
+    print(experience)
+    print(height)
+
+
+def generate_player_stats(team, total_players, total_experienced, total_inexperienced, average_height):   
+    print(f"Team: {team} Stats")
+    print("-----------------")
+    print(f"Total players: {total_players}")
+    print(f"Total experienced: {total_experienced}")
+    print(f"Total inexperienced: {total_inexperienced}")
+    print(f"Average height: {average_height}")
+
+
+
+    
 
 if __name__ == "__main__":
     start_app()
+    
+    
     #balance_teams(CONSTANT_TEAMS_COPY)
+
+
+
+    #questions
+     #- Where could I incorporate packing/unpacking in this project? I understand the concept, but
+     # I'm not sure where to try and apply it.
