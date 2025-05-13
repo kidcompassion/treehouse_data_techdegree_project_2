@@ -1,4 +1,5 @@
 import constants
+import sys
 import statistics
 import copy
 
@@ -9,7 +10,8 @@ CONSTANT_TEAMS_COPY = copy.deepcopy(CONSTANT_TEAMS)
 CONSTANT_PLAYERS_COPY = copy.deepcopy(CONSTANT_PLAYERS)
 
 
-# clean data function
+####  Functions to clean data
+
 def clean_data(player_data):
     """
     Function:  Cleans data input
@@ -17,9 +19,6 @@ def clean_data(player_data):
         CONSTANT_PLAYERS: raw player data
     Returns: A list of dictionaries
     """
-    
-    # Create copies of data
-    
 
 
     # For each player, update the values with cleaned data
@@ -82,11 +81,10 @@ def clean_guardians(player_details):
     
 
 
-# balance_teams function
+#### Function to balance team
 
 def balance_teams(team_data):
 
-    
     teams = team_data
     player_data = clean_data(CONSTANT_PLAYERS_COPY)
     # Create a dictionary that uses each team name as a key
@@ -152,83 +150,122 @@ def balance_teams(team_data):
     return all_teams
 
 
-def start_app():
 
+#### Functions to generate menus
+
+
+def dynamic_team_menu():
+    """
+    Function to generate a list of teams that can be looped through to dynamically generate
+    the in-app menu, for future cases where more data gets added
+    """
+    # This list will hold a sublist for each team in the teams constant in the format ["Team name", "menu letter"]
+    menu_team_list = []
+    # This will assign a corresponding letter to each team in the list
+    alphabet = "abcdefghijklmnopqrstuvwxyz"
+
+    for i, team in enumerate(CONSTANT_TEAMS_COPY):
+        menu_team_list.append([team, alphabet[i]])
+    
+    return menu_team_list
+
+
+def print_main_menu():
+    print("BASKETBALL TEAM STATS TOOL \n\n")
+    print("---- MAIN MENU----")
+    print("Here are your choices:")
+    print("A) Display Team Stats")
+    print("B) Quit")
+    return input("Enter an option: ")
+
+def print_secondary_menu():
+    dynamic_menu_list = dynamic_team_menu()
+
+    # get the total number of teams in the list and their corresponding letters
+    total_teams = len(dynamic_menu_list)
+    # set a counter
+    i = 0
+    # Loop through the list of teams and letters to dynamically add each team in the list
+    # to the menu
+    while i in range(0, total_teams):
+        print(f"{dynamic_menu_list[i][1].upper()}) {dynamic_menu_list[i][0]} ") 
+        i+=1
+    return input("Enter an option: ")
+
+def menu():
     teams = balance_teams(CONSTANT_TEAMS_COPY)
-    
-    print("BASKETBALL TEAM STATS TOOL")
     while True:
-        selection_a = input("""
-            ---- MAIN MENU----
-            Here are your choices:
-            A) Display Team Stats
-            B) Quit
-            Enter an option:             
-        """)
-
+        
+        
+        selection_a = print_main_menu()
         if selection_a == "A".lower():
-            selection_b = input(
-                """
-                A) Panthers
-                B) Bandits
-                C) Warriors
-                \n
-                Enter an option:
-                """
-            )
+            selection_b = print_secondary_menu()
+                
+            # Get the list of teams with their corresponding menu letter
+            dynamic_menu_list = dynamic_team_menu()
 
-            if selection_b.lower() == "a":
-                # can this be constructed dynamically?
-                # title
-                # team name
-                # stats
-                # players
-                #
-                team_name = "Panthers"
-                count_players(teams[0][team_name])
-             
-                count_player_experience(teams[0][team_name])
+            # get the total number of teams in the list
+            total_teams = len(dynamic_menu_list)
+            # set a counter
+            i = 0
+            # Loop through each team
+            while i in range(0, total_teams):
+                # compare the user input to the dynamic menu
+                if selection_b.lower() == dynamic_menu_list[i][1]:
+                    # ...and return the relevant team data
+                    print_team_details(teams, dynamic_menu_list[i][0], i)
+                # increment the counter
+                i+=1
+            # break
+            # this should run the menu option again
 
-                calculate_avg_height(teams[0][team_name])
-                # for player in teams[0]['Panthers']:
-
-                #     unpack_print_details(**player)
-                #     #print_player_details(name=player['name'], guardians = player['guardians'], experience = player['experience'], height=player["height"])
-
-                #print(teams[0]['Panthers'])
-            elif selection_b.lower() == "b":
-
-                team_name = "Bandits"
-                count_players(teams[1][team_name])
-               
-                for player in teams[1]['Bandits']:
-                    print_player_details(name=player['name'], guardians = player['guardians'], experience = player['experience'], height=player["height"])
-            elif selection_b.lower() == "c":
-
-                team_name = "Warriors"
-                count_players(teams[2][team_name])
-
-                for player in teams[2]['Warriors']:
-                    print_player_details(name=player['name'], guardians = player['guardians'], experience = player['experience'], height=player["height"])
+        elif selection_a.lower() == "b":
+            print("The app is shutting down")
+            sys.exit()
 
 
 
+#### Function to start app
+def start_app():
+    menu()
+#### Functions to calculate each team's data points
 def count_players(team_roster):
-    print(f"{len(team_roster)}")
-    
-def count_player_experience(team_roster):
-    total_exp = 0
+    """
+    Function to count the total number of players on the provided roster
+    Arg: List of dictionaries
+    Returns an integer
+    """
+    # Should this be printed or returned?
+    return len(team_roster)
+
+def count_player_inexperience(team_roster):
+    """
+    Function to count inexperienced players on the provided roster
+    Arg: List of dictionaries containing player details
+    Returns int
+    """
     total_inexp = 0
+    for player in team_roster:
+        if player['experience'] == False:
+            total_inexp +=1
+
+    return total_inexp
+
+
+def count_player_experience(team_roster):
+    """
+    Function to count experience players on the provided roster
+    Arg: List of dictionaries containing player details
+    Returns int
+    """
+    total_exp = 0
     for player in team_roster:
         if player['experience'] == True:
             total_exp +=1
-        else:
-            total_inexp += 1
 
-    print(f"{total_exp} experienced players and {total_inexp} inexperienced players")
+    return total_exp
 
-    
-    print(total_exp)
+
 
 def calculate_avg_height(team_roster):
     all_heights = []
@@ -236,30 +273,42 @@ def calculate_avg_height(team_roster):
         all_heights.append(int(player['height']))
     
     avg_height = statistics.mean(all_heights)
-    print(avg_height)
-
-def print_player_details(**kwargs):
-    for key, value in kwargs.items():
-        print(f"{key} : {value}")
-
-def unpack_print_details(name, guardians, experience, height):
-    print(f"{name}")
-
-    for g in guardians:
-        print(f"{g}")
-    print(experience)
-    print(height)
+    return round(avg_height)
 
 
-def generate_player_stats(team, total_players, total_experienced, total_inexperienced, average_height):   
-    print(f"Team: {team} Stats")
-    print("-----------------")
-    print(f"Total players: {total_players}")
-    print(f"Total experienced: {total_experienced}")
-    print(f"Total inexperienced: {total_inexperienced}")
-    print(f"Average height: {average_height}")
+def print_player_list(team_roster):
+    name_list = []
+    for player in team_roster:
+        name_list.append(player["name"])
+    name_list = ", ".join(name_list)
+    return name_list
+
+def print_guardian_list(team_roster):
+    guardian_list = []
+    for player in team_roster:
+        guardian_list += player['guardians']
+    
+    guardian_list = ", ".join(guardian_list)
+    return guardian_list
 
 
+#### Function to template returned team stats
+def print_team_details(teams, team_name, team_id):
+    #print(teams)
+    print(f"Team: {team_name} Stats")
+    print("-----------------------")
+    print(f"Total players: {count_players(teams[team_id][team_name])}")
+    print(f"Experienced players: {count_player_experience(teams[team_id][team_name])}")
+    print(f"Inexperienced players: {count_player_inexperience(teams[team_id][team_name])}")
+    print(f"Average height: {calculate_avg_height(teams[team_id][team_name])}\n")
+    print(f"Players on Team: {print_player_list(teams[team_id][team_name])}")
+    print(f"Guardians: {print_guardian_list(teams[team_id][team_name])}")
+    print("Press ENTER to continue.....")
+
+    
+
+
+  
 
     
 
