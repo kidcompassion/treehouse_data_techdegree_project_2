@@ -3,6 +3,9 @@ import sys
 import statistics
 import copy
 
+from pprint import pprint
+
+
 CONSTANT_TEAMS = constants.TEAMS
 CONSTANT_PLAYERS = constants.PLAYERS
 
@@ -16,10 +19,9 @@ def clean_data(player_data):
     """
     Function:  Cleans data input
     Args: CONSTANT_TEAMS: raw team data
-        CONSTANT_PLAYERS: raw player data
+    CONSTANT_PLAYERS: raw player data
     Returns: A list of dictionaries
     """
-
 
     # For each player, update the values with cleaned data
     for player in player_data:
@@ -91,7 +93,6 @@ def balance_teams(team_data):
     organized_teams = {}
     # Loop through team names and structure the dictionary
     
-
     
     
     players_per_team = int(len(player_data)/len(team_data))
@@ -171,8 +172,7 @@ def dynamic_team_menu():
 
 
 def print_main_menu():
-    print("BASKETBALL TEAM STATS TOOL \n\n")
-    print("---- MAIN MENU----")
+    print("\n---- MAIN MENU----\n")
     print("Here are your choices:")
     print("A) Display Team Stats")
     print("B) Quit")
@@ -180,7 +180,7 @@ def print_main_menu():
 
 def print_secondary_menu():
     dynamic_menu_list = dynamic_team_menu()
-
+    print("\n")
     # get the total number of teams in the list and their corresponding letters
     total_teams = len(dynamic_menu_list)
     # set a counter
@@ -194,40 +194,56 @@ def print_secondary_menu():
 
 def menu():
     teams = balance_teams(CONSTANT_TEAMS_COPY)
+    
+    selection_a = print_main_menu()
+    if selection_a == "A".lower():
+        selection_b = print_secondary_menu()
+    elif selection_a.lower() == "b":
+        print("The app is shutting down")
+        sys.exit()
+
     while True:
         
         
-        selection_a = print_main_menu()
-        if selection_a == "A".lower():
-            selection_b = print_secondary_menu()
-                
-            # Get the list of teams with their corresponding menu letter
-            dynamic_menu_list = dynamic_team_menu()
+        
+    
+            
+        # Get the list of teams with their corresponding menu letter
+        dynamic_menu_list = dynamic_team_menu()
 
-            # get the total number of teams in the list
-            total_teams = len(dynamic_menu_list)
-            # set a counter
-            i = 0
-            # Loop through each team
-            while i in range(0, total_teams):
-                # compare the user input to the dynamic menu
-                if selection_b.lower() == dynamic_menu_list[i][1]:
-                    # ...and return the relevant team data
-                    print_team_details(teams, dynamic_menu_list[i][0], i)
-                # increment the counter
-                i+=1
-            # break
-            # this should run the menu option again
+        # get the total number of teams in the list
+        total_teams = len(dynamic_menu_list)
+        # set a counter
+        i = 0
+        # Loop through each team
+        while i in range(0, total_teams):
+            # compare the user input to the dynamic menu
+            if selection_b.lower() == dynamic_menu_list[i][1]:
+                # ...and return the relevant team data
+                print_team_details(teams, dynamic_menu_list[i][0], i)
+            # increment the counter
+            i+=1
+        # break
+        # this should run the menu option again
+        next_selection = input("Press ENTER to continue.....")
+        if next_selection == "":
+            selection_a = print_main_menu()
+            if selection_a == "A".lower():
+                selection_b = print_secondary_menu()
+            elif selection_a.lower() == "b":
+                print("The app is shutting down")
+                sys.exit()
+        else:
+            print("bloop")                 
 
-        elif selection_a.lower() == "b":
-            print("The app is shutting down")
-            sys.exit()
 
 
 
 #### Function to start app
 def start_app():
+    print("\n\n BASKETBALL TEAM STATS TOOL \n\n")
     menu()
+    
 #### Functions to calculate each team's data points
 def count_players(team_roster):
     """
@@ -275,11 +291,45 @@ def calculate_avg_height(team_roster):
     avg_height = statistics.mean(all_heights)
     return round(avg_height)
 
+    
+# Selection sort
+# https://teamtreehouse.com/library/algorithms-sorting-and-searching/code-for-selection-sort
+# Loop through the players and compare each height, adding the smallest to a new list until they're sorted
+
+def get_height_min_index(players):
+    # Start by assuming the first value in the list is the smallest
+    min_index = 0
+    for i, player in enumerate(players):
+        # compare each value to the next until we find the smallest
+        if players[i]['height'] < players[min_index]['height']:
+            # Update min_index to smallest value
+            min_index = i
+    # return min_index to the sort_all_heights_ function
+    return min_index
+
+def sort_all_heights(players):
+    # this is the new list we'll put the sort players into
+    players_by_height = []
+
+    # as long as there are players in the list
+    while len(players_by_height) < 6:
+        for player in players:
+            # run the "find smallest value" function on each player
+            curr_smallest_val = get_height_min_index(players)
+        
+            # pop the smallest value and add it to the new array
+            players_by_height.append(players.pop(curr_smallest_val))
+    
+    return players_by_height
+
+
+
 
 def print_player_list(team_roster):
     name_list = []
     for player in team_roster:
         name_list.append(player["name"])
+    
     name_list = ", ".join(name_list)
     return name_list
 
@@ -294,16 +344,19 @@ def print_guardian_list(team_roster):
 
 #### Function to template returned team stats
 def print_team_details(teams, team_name, team_id):
-    #print(teams)
+    
+    sort_height_asc = sort_all_heights(teams[team_id][team_name])
+
+    print("\n")
     print(f"Team: {team_name} Stats")
     print("-----------------------")
-    print(f"Total players: {count_players(teams[team_id][team_name])}")
-    print(f"Experienced players: {count_player_experience(teams[team_id][team_name])}")
-    print(f"Inexperienced players: {count_player_inexperience(teams[team_id][team_name])}")
-    print(f"Average height: {calculate_avg_height(teams[team_id][team_name])}\n")
-    print(f"Players on Team: {print_player_list(teams[team_id][team_name])}")
-    print(f"Guardians: {print_guardian_list(teams[team_id][team_name])}")
-    print("Press ENTER to continue.....")
+    print(f"Total players: {count_players(sort_height_asc)}")
+    print(f"Experienced players: {count_player_experience(sort_height_asc)}")
+    print(f"Inexperienced players: {count_player_inexperience(sort_height_asc)}")
+    print(f"Average height: {calculate_avg_height(sort_height_asc)}\n")
+    print(f"Players on Team: {print_player_list(sort_height_asc)}")
+    print(f"Guardians: {print_guardian_list(sort_height_asc)}")
+    
 
     
 
@@ -313,6 +366,7 @@ def print_team_details(teams, team_name, team_id):
     
 
 if __name__ == "__main__":
+    
     start_app()
     
     
