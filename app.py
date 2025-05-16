@@ -174,7 +174,7 @@ def print_secondary_menu():
     """
     Function: Writes the second menu the user sees, based on a dynamically generated list of teams
     Please note, this secondary menu may be needlessly overcomplicated. I just wanted to see if I could
-    figure out how to make the menu grow to accommodate more teams added to constants.py.
+    figure out how to make the menu grow to accommodate more teams if added to constants.py.
     Returns user input for the team selected
     """
     dynamic_menu_list = dynamic_team_menu()
@@ -247,8 +247,6 @@ def render_menus():
     else:
         invalid_selection()
     
-   
-
 def invalid_selection():
     """
     Function: Generates an error message and re-calls the menus
