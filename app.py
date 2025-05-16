@@ -206,8 +206,8 @@ def render_menus():
         # Because we're allowing for the team list to be dynamically generated, add a letter for every possible positions
         alphabet = "abcdefghijklmnopqrstuvwxyz"
         # Slice the letters associated with current number of teams (3 teams = a,b,c)
-        # Use list to turn the string into an array so we can check if user input is valid
-        team_options = list(alphabet[:total_num_teams])
+        # Use set to turn the string into a set so we can check if user input exists in the set
+        team_options = set(alphabet[:total_num_teams])
         if (selection_b not in team_options) or (selection_b == ""):
             print("Sorry, that was not a valid selection")
 
