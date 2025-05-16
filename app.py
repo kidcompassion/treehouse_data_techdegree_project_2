@@ -11,6 +11,9 @@ CONSTANT_PLAYERS = constants.PLAYERS
 CONSTANT_TEAMS_COPY = copy.deepcopy(CONSTANT_TEAMS)
 CONSTANT_PLAYERS_COPY = copy.deepcopy(CONSTANT_PLAYERS)
 
+# add total players and teams in global space for easier access
+total_num_players = len(CONSTANT_PLAYERS_COPY)
+total_num_teams = len(CONSTANT_TEAMS_COPY)
 
 ####  Functions to clean data
 
@@ -107,12 +110,10 @@ def balance_teams(team_data):
         else:
             non_experienced_players.append(player)
     
-
     # Divide experienced players by team using the floor operator to return an integer
     exp_players_per_team = len(experienced_players) // len(team_data)
     non_exp_players_per_team = len(non_experienced_players) // len(team_data)
    
-    # Set up the new all_teams structure
     all_teams = []
 
     # First, do the EXPERIENCED players
@@ -202,17 +203,22 @@ def render_menus():
         # This holds the team menu selection
         selection_b = print_secondary_menu()
         # If the selection is not one of the three teams, throw an error
-        if (selection_b not in ["a", "b", "c"]) or (selection_b == ""):
+        # Because we're allowing for the team list to be dynamically generated, add a letter for every possible positions
+        alphabet = "abcdefghijklmnopqrstuvwxyz"
+        # Slice the letters associated with current number of teams (3 teams = a,b,c)
+        # Use list to turn the string into an array so we can check if user input is valid
+        team_options = list(alphabet[:total_num_teams])
+        if (selection_b not in team_options) or (selection_b == ""):
             print("Sorry, that was not a valid selection")
 
         # grab the user input and compare it to the list of teams to get the correct data
         while True:
-            
             # Get the list of teams with their corresponding menu letter
             dynamic_menu_list = dynamic_team_menu()
 
             # get the total number of teams in the list
             total_teams = len(dynamic_menu_list)
+
             # set a counter
             i = 0
             # Loop through each team
@@ -220,10 +226,11 @@ def render_menus():
                 # compare the user input to the dynamic menu
                 if selection_b.lower() == dynamic_menu_list[i][1]:
                     # ...and return the relevant team data
+                
                     print_team_details(teams, dynamic_menu_list[i][0], i)
                 
                 i+=1
-            
+    
             # After data, redirect user toa menu
             next_selection = input("Press ENTER to start again.....")
             
@@ -348,7 +355,7 @@ def sort_all_heights(players):
     players_by_height = []
 
     # as long as there are players in the list
-    while len(players_by_height) < 6:
+    while len(players_by_height) < (total_num_players//total_num_teams):
         for player in players:
             # run the "find smallest value" function on each player
             curr_smallest_val = get_height_min_index(players)
@@ -395,7 +402,7 @@ def print_team_details(teams, team_name, team_id):
     """
     # Run the sorting algorithm
     sort_height_asc = sort_all_heights(teams[team_id][team_name])
-
+    
     print("\n")
     print(f"Team: {team_name} Stats")
     print("-----------------------")
