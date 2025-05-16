@@ -2,6 +2,7 @@ import constants
 import sys
 import statistics
 import copy
+import string
 
 # import data
 CONSTANT_TEAMS = constants.TEAMS
@@ -151,7 +152,7 @@ def dynamic_team_menu():
     # This list will hold a sublist for each team in the teams constant in the format ["Team name", "menu letter"]
     menu_team_list = []
     # This will assign a corresponding letter to each team in the list
-    alphabet = "abcdefghijklmnopqrstuvwxyz"
+    alphabet = string.ascii_lowercase
 
     for i, team in enumerate(CONSTANT_TEAMS_COPY):
         menu_team_list.append([team, alphabet[i]])
@@ -204,7 +205,7 @@ def render_menus():
         selection_b = print_secondary_menu()
         # If the selection is not one of the three teams, throw an error
         # Because we're allowing for the team list to be dynamically generated, add a letter for every possible positions
-        alphabet = "abcdefghijklmnopqrstuvwxyz"
+        alphabet = string.ascii_lowercase
         # Slice the letters associated with current number of teams (3 teams = a,b,c)
         # Use set to turn the string into a set so we can check if user input exists in the set
         team_options = set(alphabet[:total_num_teams])
