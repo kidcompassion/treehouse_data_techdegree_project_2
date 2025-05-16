@@ -3,12 +3,11 @@ import sys
 import statistics
 import copy
 
-from pprint import pprint
-
-
+# import data
 CONSTANT_TEAMS = constants.TEAMS
 CONSTANT_PLAYERS = constants.PLAYERS
 
+# make a copy of the data
 CONSTANT_TEAMS_COPY = copy.deepcopy(CONSTANT_TEAMS)
 CONSTANT_PLAYERS_COPY = copy.deepcopy(CONSTANT_PLAYERS)
 
@@ -22,14 +21,20 @@ def clean_data(player_data):
     CONSTANT_PLAYERS: raw player data
     Returns: A list of dictionaries
     """
-
+    # This will hold the cleaned data
+    cleaned_player_data = []
+    
     # For each player, update the values with cleaned data
     for player in player_data:
-        player["height"] = clean_height(player)
-        player["experience"] = clean_experience(player)
-        player["guardians"] = clean_guardians(player)
+      
+        cleaned_player_data.append({
+            "name": player["name"],
+            "guardians": clean_guardians(player),
+            "experience": clean_experience(player),
+            "height": clean_height(player)
+            })
 
-    return player_data
+    return cleaned_player_data
         
 
 
@@ -54,6 +59,7 @@ def clean_experience(player_details):
         player_experience_bool = False
     else:
         player_experience_bool = True
+    
     return player_experience_bool
 
 
@@ -63,7 +69,6 @@ def clean_guardians(player_details):
     Args: player_details: data for individual player 
     Returns: list
     """
-
     player_guardians_list = player_details['guardians'].split()
     new_guardian_string = []
     
@@ -81,84 +86,66 @@ def clean_guardians(player_details):
 
     return new_guardian_string
     
-
-
 #### Function to balance team
 
 def balance_teams(team_data):
+    """
+    Function: Evenly splits exp and non-exp player data across the total number of teams on the list
+    Args: Pass in information for team names
+    Returns: a list of dictionaries, one dict for each team
+    """
 
-    teams = team_data
     player_data = clean_data(CONSTANT_PLAYERS_COPY)
-    # Create a dictionary that uses each team name as a key
-    organized_teams = {}
-    # Loop through team names and structure the dictionary
-    
-    
-    
-    players_per_team = int(len(player_data)/len(team_data))
-    
-    # split players into three teams
-    # you can assign them to a team name later
     
     experienced_players = []
     non_experienced_players = []
     
-    # Split up experienced and non-experienced players into two lists
+    # Split up experienced and non-experienced players into two complete lists
     for player in player_data:
         if player['experience'] == True:
             experienced_players.append(player)
         else:
             non_experienced_players.append(player)
-        
-    total_players = len(player_data)
-    total_team = len(team_data)
+    
 
-
-    # divide experienced players by team using the floor operator to return an integer
+    # Divide experienced players by team using the floor operator to return an integer
     exp_players_per_team = len(experienced_players) // len(team_data)
     non_exp_players_per_team = len(non_experienced_players) // len(team_data)
    
     # Set up the new all_teams structure
     all_teams = []
 
-    # can this be done in a function, to avoid repeating everything in such a clunky way?
-
     # First, do the EXPERIENCED players
     # loop through the list of teams
     for i, team in enumerate(team_data):
         # Manually calculate the slice for each team, eg players_data[0:2] for the first team, [3:5], [6:8]
-
-        # dynamically generate the start index by multiplying the team index by multihow many players there are on each team
+        # Dynamically generate the start index by multiplying the team index by multihow many players there are on each team
         start_index = i * exp_players_per_team
         # dynamically generate the end index by adding the start index to the number of players per team
         end_index = start_index + exp_players_per_team
-        #print(start_index, end_index)
         # everytime we loop, slice a chunk out of the players list (this increments based on team index)
         assigned_players = experienced_players[start_index:end_index]
         # construct player list
-
         all_teams.append({team: assigned_players})
         
-
-    # Next, do the INEXPERIENCED players using the same structure
+    # Next, do the INEXPERIENCED players using the same slicing method
     for i, team in enumerate(team_data):
         start_index = i * non_exp_players_per_team
         end_index = start_index + non_exp_players_per_team
         assigned_players = non_experienced_players[start_index:end_index]
-        # Instead of adding new dictionaries for each team, append to existing ones
+        # Instead of adding new dictionaries for each team, just append to existing ones
         all_teams[i][team]+= assigned_players
 
     return all_teams
 
 
-
 #### Functions to generate menus
-
 
 def dynamic_team_menu():
     """
     Function to generate a list of teams that can be looped through to dynamically generate
     the in-app menu, for future cases where more data gets added
+    Returns a list of team names from constants.py
     """
     # This list will hold a sublist for each team in the teams constant in the format ["Team name", "menu letter"]
     menu_team_list = []
@@ -172,6 +159,10 @@ def dynamic_team_menu():
 
 
 def print_main_menu():
+    """
+    Function: Writes the first menu user sees and takes their selection
+    Returns the value of user input
+    """
     print("\n---- MAIN MENU----\n")
     print("Here are your choices:")
     print("A) Display Team Stats")
@@ -179,6 +170,12 @@ def print_main_menu():
     return input("Enter an option: ")
 
 def print_secondary_menu():
+    """
+    Function: Writes the second menu the user sees, based on a dynamically generated list of teams
+    Please note, this secondary menu may be needlessly overcomplicated. I just wanted to see if I could
+    figure out how to make the menu grow to accommodate more teams added to constants.py.
+    Returns user input for the team selected
+    """
     dynamic_menu_list = dynamic_team_menu()
     print("\n")
     # get the total number of teams in the list and their corresponding letters
@@ -192,57 +189,85 @@ def print_secondary_menu():
         i+=1
     return input("Enter an option: ")
 
-def menu():
+
+def render_menus():
+    """
+    Function: Generates the two menus, handles input and checks input for errors
+    """
     teams = balance_teams(CONSTANT_TEAMS_COPY)
-    
+
+    # This holds the first menu selection
     selection_a = print_main_menu()
-    if selection_a == "A".lower():
+    if selection_a.lower() == "a":
+        # This holds the team menu selection
         selection_b = print_secondary_menu()
-    elif selection_a.lower() == "b":
-        print("The app is shutting down")
-        sys.exit()
+        # If the selection is not one of the three teams, throw an error
+        if (selection_b not in ["a", "b", "c"]) or (selection_b == ""):
+            print("Sorry, that was not a valid selection")
 
-    while True:
-        
-        
-        
-    
+        # grab the user input and compare it to the list of teams to get the correct data
+        while True:
             
-        # Get the list of teams with their corresponding menu letter
-        dynamic_menu_list = dynamic_team_menu()
+            # Get the list of teams with their corresponding menu letter
+            dynamic_menu_list = dynamic_team_menu()
 
-        # get the total number of teams in the list
-        total_teams = len(dynamic_menu_list)
-        # set a counter
-        i = 0
-        # Loop through each team
-        while i in range(0, total_teams):
-            # compare the user input to the dynamic menu
-            if selection_b.lower() == dynamic_menu_list[i][1]:
-                # ...and return the relevant team data
-                print_team_details(teams, dynamic_menu_list[i][0], i)
-            # increment the counter
-            i+=1
-        # break
-        # this should run the menu option again
-        next_selection = input("Press ENTER to continue.....")
-        if next_selection == "":
-            selection_a = print_main_menu()
-            if selection_a == "A".lower():
-                selection_b = print_secondary_menu()
+            # get the total number of teams in the list
+            total_teams = len(dynamic_menu_list)
+            # set a counter
+            i = 0
+            # Loop through each team
+            while i in range(0, total_teams):
+                # compare the user input to the dynamic menu
+                if selection_b.lower() == dynamic_menu_list[i][1]:
+                    # ...and return the relevant team data
+                    print_team_details(teams, dynamic_menu_list[i][0], i)
+                
+                i+=1
+            
+            # After data, redirect user toa menu
+            next_selection = input("Press ENTER to start again.....")
+            
+            # If user selected enter, rerun the menus
+            if next_selection == "":
+                render_menus()
             elif selection_a.lower() == "b":
-                print("The app is shutting down")
-                sys.exit()
-        else:
-            print("bloop")                 
+                exit_app()
+            else:
+                invalid_selection()      
 
+    elif selection_a.lower() == "b":
+        exit_app()
+    else:
+        invalid_selection()
+    
+   
 
+def invalid_selection():
+    """
+    Function: Generates an error message and re-calls the menus
+    (In a function to avoid re-using code)
+    """
+    # If selection was not valid, show error
+    print("Sorry, that was not a valid selection. Try again.")    
+    # and start menus again
+    render_menus()             
+
+def exit_app():
+    """
+    Function: Generates a goodbye message and closes the app
+    (In a function to avoid re-using code)
+    """
+    print("Okay, thanks for using the app. Goodbye!")
+    sys.exit()
 
 
 #### Function to start app
 def start_app():
+    """
+    Function: Prints the main header and renders the menus 
+    """
     print("\n\n BASKETBALL TEAM STATS TOOL \n\n")
-    menu()
+    render_menus()
     
 #### Functions to calculate each team's data points
 def count_players(team_roster):
@@ -282,8 +307,12 @@ def count_player_experience(team_roster):
     return total_exp
 
 
-
 def calculate_avg_height(team_roster):
+    """
+    Function: Calculates the mean height for all player
+    Args: List of dictionaries containing player details
+    Returns: INT for average height
+    """
     all_heights = []
     for player in team_roster:
         all_heights.append(int(player['height']))
@@ -292,11 +321,12 @@ def calculate_avg_height(team_roster):
     return round(avg_height)
 
     
-# Selection sort
-# https://teamtreehouse.com/library/algorithms-sorting-and-searching/code-for-selection-sort
-# Loop through the players and compare each height, adding the smallest to a new list until they're sorted
-
 def get_height_min_index(players):
+    """
+    Function: Finds the index for the lowest height in the current list of players
+    Gets called in sort_all_heights()
+    This is part of a Selection Sort algorithm, from https://teamtreehouse.com/library/algorithms-sorting-and-searching/code-for-selection-sort
+    """
     # Start by assuming the first value in the list is the smallest
     min_index = 0
     for i, player in enumerate(players):
@@ -308,6 +338,12 @@ def get_height_min_index(players):
     return min_index
 
 def sort_all_heights(players):
+    
+    """
+    Function: Loops through the players and compares each height, adding the smallest to a new list until they're sorted ASC
+    Args: A list of dictionaries, one for each player
+    returns a list of dictionaries, one for each player, sorted from smallest to tallest
+    """
     # this is the new list we'll put the sort players into
     players_by_height = []
 
@@ -323,9 +359,12 @@ def sort_all_heights(players):
     return players_by_height
 
 
-
-
 def print_player_list(team_roster):
+    """
+    Function: Formats players list in a readble way
+    Args: List of dictionaries, one for each player on current team
+    Returns: Comma separated string
+    """
     name_list = []
     for player in team_roster:
         name_list.append(player["name"])
@@ -334,6 +373,11 @@ def print_player_list(team_roster):
     return name_list
 
 def print_guardian_list(team_roster):
+    """
+    Function: Formats guardians in a readable way
+    Args: List of dictionaries, one for each player on current team
+    Returns: Command separated string
+    """
     guardian_list = []
     for player in team_roster:
         guardian_list += player['guardians']
@@ -344,7 +388,12 @@ def print_guardian_list(team_roster):
 
 #### Function to template returned team stats
 def print_team_details(teams, team_name, team_id):
-    
+    """
+    Function: Prints out all available team stats
+    Args: List of dictionaries, one for each team and its players, String of team name, int of team id
+    Returns printed strings
+    """
+    # Run the sorting algorithm
     sort_height_asc = sort_all_heights(teams[team_id][team_name])
 
     print("\n")
@@ -357,23 +406,5 @@ def print_team_details(teams, team_name, team_id):
     print(f"Players on Team: {print_player_list(sort_height_asc)}")
     print(f"Guardians: {print_guardian_list(sort_height_asc)}")
     
-
-    
-
-
-  
-
-    
-
 if __name__ == "__main__":
-    
     start_app()
-    
-    
-    #balance_teams(CONSTANT_TEAMS_COPY)
-
-
-
-    #questions
-     #- Where could I incorporate packing/unpacking in this project? I understand the concept, but
-     # I'm not sure where to try and apply it.
