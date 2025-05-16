@@ -120,7 +120,7 @@ def balance_teams(team_data):
     # loop through the list of teams
     for i, team in enumerate(team_data):
         # Manually calculate the slice for each team, eg players_data[0:2] for the first team, [3:5], [6:8]
-        # Dynamically generate the start index by multiplying the team index by multihow many players there are on each team
+        # Dynamically generate the start index by multiplying the team index by how many players there are on each team
         start_index = i * exp_players_per_team
         # dynamically generate the end index by adding the start index to the number of players per team
         end_index = start_index + exp_players_per_team
@@ -134,7 +134,7 @@ def balance_teams(team_data):
         start_index = i * non_exp_players_per_team
         end_index = start_index + non_exp_players_per_team
         assigned_players = non_experienced_players[start_index:end_index]
-        # Instead of adding new dictionaries for each team, just append to existing ones
+        # Instead of creating new team dictionaries for these players, just append to existing ones
         all_teams[i][team]+= assigned_players
 
     return all_teams
